@@ -1,7 +1,8 @@
 # app.py
-import streamlit as st
-import pandas as pd
-import joblib
+streamlit
+pandas
+scikit-learn
+joblib
 openpyxl
 from sklearn.preprocessing import LabelEncoder
 
