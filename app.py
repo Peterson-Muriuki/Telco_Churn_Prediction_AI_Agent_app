@@ -9,7 +9,7 @@ model = joblib.load("churn_model.pkl")
 st.set_page_config(page_title="Telco Customer Churn Predictor", layout="centered")
 
 # --- App Title ---
-st.title("🌟 Telco Customer Churn Prediction App")
+st.title("Telco Customer Churn Prediction AI Agent")
 st.write(
     "Predict whether a customer is likely to churn based on their profile and account data."
 )
