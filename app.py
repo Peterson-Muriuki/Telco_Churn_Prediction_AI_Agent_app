@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+openpyxl
 from sklearn.preprocessing import LabelEncoder
 
 # --- Load the trained model ---
