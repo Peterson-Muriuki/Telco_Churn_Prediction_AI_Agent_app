@@ -1,10 +1,9 @@
 # app.py
-streamlit
-pandas
-scikit-learn
-joblib
-openpyxl
+import streamlit as st
+import pandas as pd
+import joblib
 from sklearn.preprocessing import LabelEncoder
+import openpyxl
 
 # --- Load the trained model ---
 model = joblib.load("churn_model.pkl")
