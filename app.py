@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from sklearn.preprocessing import LabelEncoder
 
 # --- Load the trained model ---
 model = joblib.load("churn_model.pkl")
@@ -9,16 +10,57 @@ model = joblib.load("churn_model.pkl")
 st.set_page_config(page_title="Telco Customer Churn Predictor", layout="centered")
 
 # --- App Title ---
-st.title("Telco Customer Churn Prediction AI Agent")
-st.write(
-    "Predict whether a customer is likely to churn based on their profile and account data."
-)
+st.title("🌟 Telco Customer Churn Prediction AI Agent")
+st.write("Predict whether a customer is likely to churn based on their profile and account data.")
 
-# --- Sidebar for user input ---
+# --- 1️⃣ Bulk Prediction Section ---
+st.header("📁 Bulk Churn Prediction")
+uploaded_file = st.file_uploader("Upload your dataset (CSV or Excel)", type=['csv', 'xlsx'])
+
+if uploaded_file:
+    # Read file
+    if uploaded_file.name.endswith('.csv'):
+        data = pd.read_csv(uploaded_file)
+    else:
+        data = pd.read_excel(uploaded_file)
+
+    st.write("Preview of uploaded data:")
+    st.dataframe(data.head())
+
+    # Preprocess uploaded data
+    df = data.copy()
+    if 'customerID' in df.columns:
+        df = df.drop(columns=['customerID'])
+
+    # Encode categorical columns
+    le = LabelEncoder()
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = le.fit_transform(df[col])
+
+    # Predict
+    predictions = model.predict(df)
+    prediction_probs = model.predict_proba(df)
+
+    df['Churn_Prediction'] = predictions
+    df['Probability_Not_Churning'] = prediction_probs[:, 0]
+    df['Probability_Churning'] = prediction_probs[:, 1]
+
+    st.subheader("Predictions")
+    st.dataframe(df)
+
+    # Download button
+    csv = df.to_csv(index=False)
+    st.download_button(
+        label="Download Predictions as CSV",
+        data=csv,
+        file_name='churn_predictions.csv',
+        mime='text/csv'
+    )
+
+# --- 2️⃣ Manual Input Section ---
 st.sidebar.header("Enter Customer Details")
 
 def user_input_features():
-    # You can adjust these fields to match your model's features exactly
     gender = st.sidebar.selectbox("Gender", ("Male", "Female"))
     senior_citizen = st.sidebar.selectbox("Senior Citizen", (0, 1))
     partner = st.sidebar.selectbox("Partner", ("Yes", "No"))
@@ -65,24 +107,20 @@ def user_input_features():
         'MonthlyCharges': monthly_charges,
         'TotalCharges': total_charges
     }
-    features = pd.DataFrame(data, index=[0])
-    return features
+    return pd.DataFrame(data, index=[0])
 
 input_df = user_input_features()
 
-# --- Encode input the same way as model training ---
-# For simplicity, we assume all categorical variables were label-encoded
-from sklearn.preprocessing import LabelEncoder
-
+# Encode input
 for col in input_df.select_dtypes(include='object').columns:
     le = LabelEncoder()
     input_df[col] = le.fit_transform(input_df[col])
 
-# --- Prediction ---
+# Predict manual input
 prediction = model.predict(input_df)
 prediction_proba = model.predict_proba(input_df)
 
-st.subheader("Prediction")
+st.subheader("Manual Input Prediction")
 churn_label = "Yes" if prediction[0] == 1 else "No"
 st.write(f"Customer likely to churn? **{churn_label}**")
 
